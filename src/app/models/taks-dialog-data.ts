@@ -1,5 +1,8 @@
+import { Contributor } from "./contributor";
+
 export class TaskDialogData{
     title: string;
     description: string;
-    assignee: string;
+    assignee: Contributor;
+    contributors: Contributor[]
 }

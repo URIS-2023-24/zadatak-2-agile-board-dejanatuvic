@@ -20,42 +20,51 @@ export class TableListComponent implements OnInit {
 
   constructor(private taskService: TasksService,
               private contributorsService: ContributorsService,
-              private dialog: MatDialog) { }
+              private dialogModel: MatDialog) { }
 
   ngOnInit() {
     this.startSubscription();
   }
 
   startSubscription() {
-    this.taskService.getTasks().subscribe(res => {
-      this.tasks = res;
-    });
-
     this.contributorsService.getContributors().subscribe(res => {
       this.contributors = res;
+    });
+
+    this.taskService.getTasks().subscribe(res => {
+      res.forEach( item => {
+        if (item.assignee !== "") {
+          const contributor = this.contributors.find( con => con.userName == item.assignee );
+          if (contributor) {
+            this.tasks.push({ id: item.id, title: item.title, description: item.description, assignee: contributor });
+          }
+        } else {
+          this.tasks.push({ id: item.id, title: item.title, description: item.description, assignee: new Contributor() });
+        }
+      })
     });
   }
 
   //pozivamo iz html-a, brisemo samo iz niza tasks tj. samo iz fronta
-  deleteTask(id : number){
-    const index = this.tasks.findIndex((obj : Task) => obj.id = id);
-    this.tasks.splice(index, 1);
+  deleteTask(task : Task) {
+    const taskIndex = this.tasks.findIndex( (obj: Task) => obj.id == task.id);
+    this.tasks.splice(taskIndex, 1);
   }
 
-  editTask(task : Task){
-    const dialog = this.dialog.open(TableListDialogComponent, {
-      width: "600px",
-      data: { title: task.title, description: task.description, assignee: task.assignee}
-    })
+  editTask(task: Task) {
+    const dialog = this.dialogModel.open(TableListDialogComponent, {
+      width: '600px',
+      data: { title: task.title, description: task.description, assignee: task.assignee, contributors: this.contributors }
+    });
 
     dialog.afterClosed().subscribe( result => {
       if(result) {
         const index = this.tasks.findIndex((obj : Task) => obj.id = task.id);
         this.tasks[index].title = result.title;
-        this.tasks[index].description = result.title;
-        this.tasks[index].assignee = result.title;
+        this.tasks[index].description = result.description;
+        this.tasks[index].assignee = result.assignee;
       }
-    })
+    });
   }
 
 }

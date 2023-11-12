@@ -8,6 +8,7 @@ import { TaskDialogData } from 'app/models/taks-dialog-data';
   styleUrls: ['./table-list-dialog.component.scss']
 })
 export class TableListDialogComponent implements OnInit {
+  dialogData : TaskDialogData;
 
   constructor( private dialogRef: MatDialogRef<TableListDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) public data: TaskDialogData) { }
